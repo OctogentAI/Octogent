@@ -1,12 +1,19 @@
 {
-  "name": "my-project",
-  "version": "0.1.0",
+  "name": "octogent",
+  "version": "1.0.0",
+  "description": "Autonomous Multi-Agent AI System with parallel task execution",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "server": "tsx server/index.ts",
+    "server:dev": "tsx watch server/index.ts",
+    "cli": "tsx server/channels/cli.ts",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -64,6 +71,9 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/ws": "^8.5.14",
+    "tsx": "^4.19.2",
     "@tailwindcss/postcss": "^4.2.0",
     "@types/node": "^22",
     "@types/react": "19.2.14",

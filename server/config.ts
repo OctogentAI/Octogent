@@ -6,7 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import type { SystemConfig, DeepPartial } from '../lib/types';
 
-const CONFIG_PATH = process.env.CONFIG_PATH || path.join(process.cwd(), 'openclaw.config.json');
+const CONFIG_PATH = process.env.CONFIG_PATH || path.join(process.cwd(), 'octogent.config.json');
 
 // Default configuration
 const DEFAULT_CONFIG: SystemConfig = {

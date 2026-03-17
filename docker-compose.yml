@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  # Octogent Server (Gateway + Workers)
+  octogent:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    ports:
+      - "18789:18789"
+    environment:
+      - NODE_ENV=production
+      - GATEWAY_PORT=18789
+      - GATEWAY_HOST=0.0.0.0
+      - OLLAMA_HOST=http://ollama:11434
+      - REDIS_URL=redis://redis:6379
+      - SEARXNG_URL=http://searxng:8080
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+    volumes:
+      - ./workspace:/app/workspace
+      - ./octogent.config.json:/app/octogent.config.json
+    depends_on:
+      - redis
+      - ollama
+    restart: unless-stopped
+    networks:
+      - octogent-network
+
+  # Next.js Dashboard
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_GATEWAY_URL=ws://localhost:18789
+      - GATEWAY_URL=http://octogent:18789
+    depends_on:
+      - octogent
+    restart: unless-stopped
+    networks:
+      - octogent-network
+
+  # Redis for session storage and caching
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - octogent-network
+
+  # Ollama for local LLM inference
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - octogent-network
+    # Uncomment for GPU support
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  # SearXNG for web search
+  searxng:
+    image: searxng/searxng:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./searxng:/etc/searxng
+    environment:
+      - BASE_URL=http://localhost:8080
+      - INSTANCE_NAME=Octogent Search
+    restart: unless-stopped
+    networks:
+      - octogent-network
+
+volumes:
+  redis-data:
+  ollama-data:
+
+networks:
+  octogent-network:
+    driver: bridge

@@ -1,0 +1,38 @@
+# Octogent Server Dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies for native modules
+RUN apk add --no-cache python3 make g++ bash
+
+# Copy package files
+COPY package*.json ./
+COPY pnpm-lock.yaml ./
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy server code
+COPY server/ ./server/
+COPY lib/ ./lib/
+COPY octogent.config.json ./
+COPY tsconfig.json ./
+
+# Create workspace directory
+RUN mkdir -p workspace/skills
+
+# Copy default skills
+COPY workspace/skills/ ./workspace/skills/
+
+# Build TypeScript
+RUN pnpm exec tsc --project tsconfig.server.json || true
+
+# Expose gateway port
+EXPOSE 18789
+
+# Start server
+CMD ["node", "--experimental-specifier-resolution=node", "server/index.js"]
