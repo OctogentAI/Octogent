@@ -38,7 +38,7 @@ async function fetchAndParse(url: string): Promise<FetchedPage> {
   const response = await fetch(url, {
     method: 'GET',
     headers: {
-      'User-Agent': 'Mozilla/5.0 (compatible; OpenClaw/1.0; +https://github.com/openclaw)',
+      'User-Agent': 'Mozilla/5.0 (compatible; Octogent/1.0; +https://github.com/OctogentAI/Octogent)',
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       'Accept-Language': 'en-US,en;q=0.5'
     },

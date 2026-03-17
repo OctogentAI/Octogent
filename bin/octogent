@@ -1,0 +1,614 @@
+#!/usr/bin/env bash
+# ============================================================================
+# Octogent CLI
+# Autonomous Multi-Agent AI System
+# Copyright (c) 2024 Octogent Labs. All rights reserved.
+# Contact: Octogent@pm.me
+# ============================================================================
+
+set -e
+
+VERSION="1.0.0"
+OCTOGENT_HOME="${OCTOGENT_HOME:-$HOME/.octogent}"
+CONFIG_FILE="$OCTOGENT_HOME/config.json"
+PID_FILE="$OCTOGENT_HOME/octogent.pid"
+LOG_FILE="$OCTOGENT_HOME/octogent.log"
+DEFAULT_PORT=8888
+DEFAULT_MODEL="llama3.2:8b"
+DEFAULT_THREADS=8
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+# ============================================================================
+# Helper Functions
+# ============================================================================
+
+print_banner() {
+    echo -e "${CYAN}"
+    cat << 'EOF'
+   ____       _                         _   
+  / __ \  ___| |_ ___   __ _  ___ _ __ | |_ 
+ / / _` |/ __| __/ _ \ / _` |/ _ \ '_ \| __|
+| | (_| | (__| || (_) | (_| |  __/ | | | |_ 
+ \ \__,_|\___|\__\___/ \__, |\___|_| |_|\__|
+  \____/               |___/                 
+                                          
+EOF
+    echo -e "${NC}"
+    echo -e "  ${GREEN}Autonomous Multi-Agent AI System${NC}"
+    echo -e "  ${BLUE}Version $VERSION${NC}"
+    echo ""
+}
+
+log_info() {
+    echo -e "${GREEN}[INFO]${NC} $1"
+}
+
+log_warn() {
+    echo -e "${YELLOW}[WARN]${NC} $1"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+log_debug() {
+    if [ "$DEBUG" = "true" ]; then
+        echo -e "${BLUE}[DEBUG]${NC} $1"
+    fi
+}
+
+check_dependencies() {
+    local missing=()
+    
+    if ! command -v node &> /dev/null; then
+        missing+=("node")
+    fi
+    
+    if ! command -v npm &> /dev/null; then
+        missing+=("npm")
+    fi
+    
+    if ! command -v ollama &> /dev/null; then
+        missing+=("ollama")
+    fi
+    
+    if [ ${#missing[@]} -gt 0 ]; then
+        log_error "Missing dependencies: ${missing[*]}"
+        echo ""
+        echo "Please install the following:"
+        for dep in "${missing[@]}"; do
+            case $dep in
+                node|npm)
+                    echo "  - Node.js: https://nodejs.org/"
+                    ;;
+                ollama)
+                    echo "  - Ollama: https://ollama.ai/"
+                    ;;
+            esac
+        done
+        exit 1
+    fi
+}
+
+ensure_home_dir() {
+    if [ ! -d "$OCTOGENT_HOME" ]; then
+        mkdir -p "$OCTOGENT_HOME"
+        mkdir -p "$OCTOGENT_HOME/logs"
+        mkdir -p "$OCTOGENT_HOME/workspace"
+        mkdir -p "$OCTOGENT_HOME/skills"
+        log_info "Created Octogent home directory: $OCTOGENT_HOME"
+    fi
+}
+
+load_config() {
+    if [ -f "$CONFIG_FILE" ]; then
+        MODEL=$(jq -r '.model // empty' "$CONFIG_FILE" 2>/dev/null || echo "")
+        THREADS=$(jq -r '.threads // empty' "$CONFIG_FILE" 2>/dev/null || echo "")
+        PORT=$(jq -r '.port // empty' "$CONFIG_FILE" 2>/dev/null || echo "")
+        API_KEY=$(jq -r '.apiKey // empty' "$CONFIG_FILE" 2>/dev/null || echo "")
+    fi
+    
+    MODEL="${MODEL:-$DEFAULT_MODEL}"
+    THREADS="${THREADS:-$DEFAULT_THREADS}"
+    PORT="${PORT:-$DEFAULT_PORT}"
+}
+
+save_config() {
+    cat > "$CONFIG_FILE" << EOF
+{
+  "model": "$MODEL",
+  "threads": $THREADS,
+  "port": $PORT,
+  "apiKey": "$API_KEY",
+  "updatedAt": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+}
+EOF
+    log_info "Configuration saved to $CONFIG_FILE"
+}
+
+is_running() {
+    if [ -f "$PID_FILE" ]; then
+        local pid=$(cat "$PID_FILE")
+        if ps -p "$pid" > /dev/null 2>&1; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
+get_pid() {
+    if [ -f "$PID_FILE" ]; then
+        cat "$PID_FILE"
+    fi
+}
+
+# ============================================================================
+# Commands
+# ============================================================================
+
+cmd_init() {
+    print_banner
+    log_info "Initializing Octogent..."
+    
+    check_dependencies
+    ensure_home_dir
+    
+    # Prompt for model selection
+    echo ""
+    echo "Available models:"
+    echo "  1) llama3.2:8b (Recommended - General purpose)"
+    echo "  2) llama3.2:70b (Large - More capable)"
+    echo "  3) codellama:13b (Code-focused)"
+    echo "  4) mistral:7b (Fast inference)"
+    echo "  5) deepseek-coder:6.7b (Code generation)"
+    echo ""
+    read -p "Select model [1-5] (default: 1): " model_choice
+    
+    case "$model_choice" in
+        2) MODEL="llama3.2:70b" ;;
+        3) MODEL="codellama:13b" ;;
+        4) MODEL="mistral:7b" ;;
+        5) MODEL="deepseek-coder:6.7b" ;;
+        *) MODEL="llama3.2:8b" ;;
+    esac
+    
+    # Prompt for thread count
+    read -p "Number of parallel workers [1-8] (default: 8): " thread_choice
+    THREADS="${thread_choice:-8}"
+    if [ "$THREADS" -lt 1 ] || [ "$THREADS" -gt 8 ]; then
+        THREADS=8
+    fi
+    
+    save_config
+    
+    # Pull the model
+    log_info "Pulling model: $MODEL"
+    log_warn "This may take a while depending on your connection (~4-8GB)..."
+    ollama pull "$MODEL"
+    
+    echo ""
+    log_info "Octogent initialized successfully!"
+    echo ""
+    echo "Next steps:"
+    echo "  1. Start the agent: octogent start"
+    echo "  2. Open the dashboard: http://localhost:$PORT"
+    echo "  3. Or use the CLI: octogent chat"
+    echo ""
+}
+
+cmd_config() {
+    ensure_home_dir
+    load_config
+    
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --model)
+                MODEL="$2"
+                shift 2
+                ;;
+            --threads)
+                THREADS="$2"
+                shift 2
+                ;;
+            --port)
+                PORT="$2"
+                shift 2
+                ;;
+            --api-key)
+                API_KEY="$2"
+                shift 2
+                ;;
+            --show)
+                echo "Current configuration:"
+                echo "  Model: $MODEL"
+                echo "  Threads: $THREADS"
+                echo "  Port: $PORT"
+                echo "  API Key: ${API_KEY:+[SET]}"
+                echo "  Config file: $CONFIG_FILE"
+                exit 0
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+    
+    save_config
+}
+
+cmd_start() {
+    print_banner
+    ensure_home_dir
+    load_config
+    
+    if is_running; then
+        log_warn "Octogent is already running (PID: $(get_pid))"
+        exit 1
+    fi
+    
+    check_dependencies
+    
+    # Check if Ollama is running
+    if ! curl -s "http://localhost:11434/api/tags" > /dev/null 2>&1; then
+        log_info "Starting Ollama service..."
+        ollama serve &
+        sleep 2
+    fi
+    
+    log_info "Starting Octogent server..."
+    log_info "Model: $MODEL"
+    log_info "Workers: $THREADS"
+    log_info "Port: $PORT"
+    echo ""
+    
+    # Start the server
+    cd "$OCTOGENT_HOME"
+    
+    export OCTOGENT_MODEL="$MODEL"
+    export OCTOGENT_THREADS="$THREADS"
+    export OCTOGENT_PORT="$PORT"
+    export OCTOGENT_API_KEY="$API_KEY"
+    
+    if [ "$1" = "--foreground" ] || [ "$1" = "-f" ]; then
+        node "$OCTOGENT_HOME/server/index.js"
+    else
+        nohup node "$OCTOGENT_HOME/server/index.js" > "$LOG_FILE" 2>&1 &
+        echo $! > "$PID_FILE"
+        
+        sleep 2
+        
+        if is_running; then
+            log_info "Octogent started successfully!"
+            echo ""
+            echo "  Dashboard: http://localhost:$PORT"
+            echo "  WebSocket: ws://localhost:$PORT/ws"
+            echo "  API: http://localhost:$PORT/api"
+            echo ""
+            echo "  View logs: octogent logs"
+            echo "  Stop: octogent stop"
+        else
+            log_error "Failed to start Octogent. Check logs: $LOG_FILE"
+            exit 1
+        fi
+    fi
+}
+
+cmd_stop() {
+    if ! is_running; then
+        log_warn "Octogent is not running"
+        exit 0
+    fi
+    
+    local pid=$(get_pid)
+    log_info "Stopping Octogent (PID: $pid)..."
+    
+    kill "$pid" 2>/dev/null
+    
+    # Wait for graceful shutdown
+    local count=0
+    while is_running && [ $count -lt 10 ]; do
+        sleep 1
+        ((count++))
+    done
+    
+    if is_running; then
+        log_warn "Force killing Octogent..."
+        kill -9 "$pid" 2>/dev/null
+    fi
+    
+    rm -f "$PID_FILE"
+    log_info "Octogent stopped"
+}
+
+cmd_restart() {
+    cmd_stop
+    sleep 1
+    cmd_start "$@"
+}
+
+cmd_status() {
+    load_config
+    
+    echo "Octogent Status"
+    echo "==============="
+    
+    if is_running; then
+        echo -e "Status: ${GREEN}Running${NC} (PID: $(get_pid))"
+    else
+        echo -e "Status: ${RED}Stopped${NC}"
+    fi
+    
+    echo "Model: $MODEL"
+    echo "Workers: $THREADS"
+    echo "Port: $PORT"
+    
+    # Check Ollama
+    if curl -s "http://localhost:11434/api/tags" > /dev/null 2>&1; then
+        echo -e "Ollama: ${GREEN}Running${NC}"
+    else
+        echo -e "Ollama: ${RED}Stopped${NC}"
+    fi
+    
+    # Check if model is available
+    if ollama list 2>/dev/null | grep -q "$MODEL"; then
+        echo -e "Model Status: ${GREEN}Available${NC}"
+    else
+        echo -e "Model Status: ${YELLOW}Not pulled${NC}"
+    fi
+}
+
+cmd_logs() {
+    if [ ! -f "$LOG_FILE" ]; then
+        log_warn "No log file found"
+        exit 0
+    fi
+    
+    if [ "$1" = "-f" ] || [ "$1" = "--follow" ]; then
+        tail -f "$LOG_FILE"
+    else
+        tail -n 100 "$LOG_FILE"
+    fi
+}
+
+cmd_chat() {
+    load_config
+    
+    if ! is_running; then
+        log_error "Octogent is not running. Start it with: octogent start"
+        exit 1
+    fi
+    
+    print_banner
+    echo "Type your message and press Enter. Type 'exit' to quit."
+    echo "=============================================="
+    echo ""
+    
+    while true; do
+        read -p "You: " message
+        
+        if [ "$message" = "exit" ] || [ "$message" = "quit" ]; then
+            echo "Goodbye!"
+            exit 0
+        fi
+        
+        if [ -z "$message" ]; then
+            continue
+        fi
+        
+        # Send message via API
+        response=$(curl -s -X POST "http://localhost:$PORT/api/tasks" \
+            -H "Content-Type: application/json" \
+            -d "{\"goal\": \"$message\"}")
+        
+        task_id=$(echo "$response" | jq -r '.id')
+        
+        if [ -n "$task_id" ] && [ "$task_id" != "null" ]; then
+            echo -e "${CYAN}Octogent: Task submitted (ID: $task_id)${NC}"
+            
+            # Poll for completion
+            while true; do
+                sleep 1
+                status=$(curl -s "http://localhost:$PORT/api/tasks/$task_id" | jq -r '.status')
+                
+                if [ "$status" = "completed" ]; then
+                    result=$(curl -s "http://localhost:$PORT/api/tasks/$task_id" | jq -r '.result')
+                    echo -e "${GREEN}Octogent: $result${NC}"
+                    break
+                elif [ "$status" = "failed" ]; then
+                    error=$(curl -s "http://localhost:$PORT/api/tasks/$task_id" | jq -r '.error')
+                    echo -e "${RED}Octogent: Error - $error${NC}"
+                    break
+                fi
+            done
+        else
+            echo -e "${RED}Failed to submit task${NC}"
+        fi
+        
+        echo ""
+    done
+}
+
+cmd_daemon() {
+    case "$1" in
+        --enable)
+            log_info "Enabling Octogent daemon..."
+            
+            # Create systemd service file
+            sudo tee /etc/systemd/system/octogent.service > /dev/null << EOF
+[Unit]
+Description=Octogent Autonomous AI Agent
+After=network.target
+
+[Service]
+Type=simple
+User=$USER
+WorkingDirectory=$OCTOGENT_HOME
+ExecStart=$0 start --foreground
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+            
+            sudo systemctl daemon-reload
+            sudo systemctl enable octogent
+            sudo systemctl start octogent
+            
+            log_info "Octogent daemon enabled and started"
+            ;;
+        --disable)
+            log_info "Disabling Octogent daemon..."
+            sudo systemctl stop octogent 2>/dev/null || true
+            sudo systemctl disable octogent 2>/dev/null || true
+            sudo rm -f /etc/systemd/system/octogent.service
+            sudo systemctl daemon-reload
+            log_info "Octogent daemon disabled"
+            ;;
+        --status)
+            systemctl status octogent
+            ;;
+        *)
+            echo "Usage: octogent daemon [--enable|--disable|--status]"
+            exit 1
+            ;;
+    esac
+}
+
+cmd_models() {
+    case "$1" in
+        list)
+            echo "Available models:"
+            echo ""
+            ollama list
+            ;;
+        pull)
+            if [ -z "$2" ]; then
+                log_error "Please specify a model name"
+                exit 1
+            fi
+            ollama pull "$2"
+            ;;
+        *)
+            echo "Usage: octogent models [list|pull <model>]"
+            ;;
+    esac
+}
+
+cmd_version() {
+    echo "Octogent v$VERSION"
+    echo "Copyright (c) 2024 Octogent Labs"
+    echo "Contact: Octogent@pm.me"
+}
+
+cmd_help() {
+    print_banner
+    cat << EOF
+Usage: octogent <command> [options]
+
+Commands:
+  init                    Initialize Octogent (first-time setup)
+  config [options]        Configure Octogent settings
+    --model <name>        Set the LLM model
+    --threads <n>         Set number of parallel workers (1-8)
+    --port <n>            Set the server port
+    --api-key <key>       Set API key for authentication
+    --show                Display current configuration
+  
+  start [-f|--foreground] Start the Octogent server
+  stop                    Stop the Octogent server
+  restart                 Restart the Octogent server
+  status                  Show server status
+  logs [-f|--follow]      View server logs
+  
+  chat                    Interactive chat mode
+  
+  daemon [option]         Manage system daemon
+    --enable              Enable and start as system service
+    --disable             Disable system service
+    --status              Show daemon status
+  
+  models [command]        Manage LLM models
+    list                  List available models
+    pull <name>           Pull a new model
+  
+  version                 Show version information
+  help                    Show this help message
+
+Examples:
+  octogent init
+  octogent config --model llama3.2:8b --threads 8
+  octogent start
+  octogent chat
+  octogent daemon --enable
+
+Documentation: https://github.com/OctogentAI/Octogent
+Support: Octogent@pm.me
+EOF
+}
+
+# ============================================================================
+# Main
+# ============================================================================
+
+main() {
+    case "${1:-}" in
+        init)
+            shift
+            cmd_init "$@"
+            ;;
+        config)
+            shift
+            cmd_config "$@"
+            ;;
+        start)
+            shift
+            cmd_start "$@"
+            ;;
+        stop)
+            cmd_stop
+            ;;
+        restart)
+            shift
+            cmd_restart "$@"
+            ;;
+        status)
+            cmd_status
+            ;;
+        logs)
+            shift
+            cmd_logs "$@"
+            ;;
+        chat)
+            cmd_chat
+            ;;
+        daemon)
+            shift
+            cmd_daemon "$@"
+            ;;
+        models)
+            shift
+            cmd_models "$@"
+            ;;
+        version|--version|-v)
+            cmd_version
+            ;;
+        help|--help|-h)
+            cmd_help
+            ;;
+        *)
+            cmd_help
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"
