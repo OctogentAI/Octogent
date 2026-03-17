@@ -1,67 +1,9 @@
 {
   "name": "octogent",
   "version": "1.0.0",
-  "description": "Autonomous multi-agent AI system that runs on your device. Execute parallel tasks with local LLMs.",
-  "author": "Octogent Labs <octogent@pm.me>",
+  },
+  "author": "Octogent Labs <Octogent@pm.me>",
   "license": "MIT",
-  "homepage": "https://github.com/OctogentAI/Octogent",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/OctogentAI/Octogent.git"
-  },
-  "bugs": {
-    "url": "https://github.com/OctogentAI/Octogent/issues"
-  },
-  "keywords": [
-    "ai",
-    "agent",
-    "llm",
-    "autonomous",
-    "multi-agent",
-    "ollama",
-    "cli",
-    "local-ai",
-    "artificial-intelligence",
-    "machine-learning"
-  ],
-  "type": "module",
-  "main": "dist/index.js",
-  "bin": {
-    "octogent": "./bin/octogent"
-  },
-  "engines": {
-    "node": ">=22.0.0"
-  },
-  "files": [
-    "dist",
-    "bin",
-    "src",
-    "workspace/skills",
-    "AGENTS.md",
-    "README.md",
-    "LICENSE"
-  ],
-  "scripts": {
-    "build": "tsup",
-    "dev": "tsx watch src/index.ts",
-    "start": "node dist/index.js",
-    "cli": "tsx src/channels/cli.ts",
-    "server": "tsx src/index.ts",
-    "server:dev": "tsx watch src/index.ts",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "lint": "oxlint --deny-warnings .",
-    "lint:fix": "oxlint --fix .",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "typecheck": "tsc --noEmit",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f",
-    "clean": "rm -rf dist node_modules/.cache",
-    "prepublishOnly": "pnpm build"
-  },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
     "better-sqlite3": "^12.8.0",

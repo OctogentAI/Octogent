@@ -1,4 +1,31 @@
-<div align="center">
+# Octogent - Autonomous Multi-Agent AI System
+
+<p align="center">
+  <img src="assets/octogent-logo.png" alt="Octogent" width="200" />
+</p>
+
+<p align="center">
+  <strong>Your Personal AI Assistant with Parallel Task Execution</strong>
+</p>
+
+<p align="center">
+  <a href="#install">Install</a> -
+  <a href="#quick-start">Quick Start</a> -
+  <a href="#features">Features</a> -
+  <a href="#architecture">Architecture</a> -
+  <a href="https://www.octogent.com/">Website</a> -
+  <a href="mailto:Octogent@pm.me">Contact</a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/TypeScript-87.8%25-3178c6?style=flat-square" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Swift-7.9%25-f05138?style=flat-square" alt="Swift" />
+  <img src="https://img.shields.io/badge/Kotlin-1.8%25-7f52ff?style=flat-square" alt="Kotlin" />
+  <img src="https://img.shields.io/badge/Shell-1.1%25-89e051?style=flat-square" alt="Shell" />
+  <img src="https://img.shields.io/badge/JavaScript-0.6%25-f7df1e?style=flat-square" alt="JavaScript" />
+  <img src="https://img.shields.io/badge/CSS-0.4%25-563d7c?style=flat-square" alt="CSS" />
+  <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="MIT License" />
+</p>
 
 # Octogent
 
@@ -7,10 +34,7 @@
 An agentic coding assistant that runs on your device.
 Execute parallel tasks with local LLMs through an 8-slot worker pool.
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-22+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 
 [Quick Start](#quick-start) |
 [Installation](#installation) |
@@ -18,7 +42,7 @@ Execute parallel tasks with local LLMs through an 8-slot worker pool.
 [Architecture](#architecture) |
 [Contributing](#contributing)
 
-</div>
+
 
 ---
 
@@ -32,11 +56,7 @@ Octogent is a **local-first autonomous AI agent** that executes complex tasks us
 - **Skills system** — Specialized agent configurations for coding, research, writing, devops
 - **Session persistence** — SQLite-backed storage for conversations and memory
 
-Think of it as your personal coding assistant that can read files, write code, run commands, search the web, and spawn sub-agents to parallelize work — all running on your machine.
 
-## Quick Start
-
-**Requirements:** Node.js 22+, [Ollama](https://ollama.ai/)
 
 ```bash
 # Install globally
@@ -52,22 +72,20 @@ octogent start
 octogent chat
 ```
 
-Or run directly without installing:
+
 
 ```bash
 npx octogent@latest init
 npx octogent start
 ```
 
-## Installation
-
-### npm (Recommended)
+<
 
 ```bash
 npm install -g octogent
 ```
 
-### From Source
+
 
 ```bash
 git clone https://github.com/OctogentAI/Octogent.git
@@ -88,7 +106,7 @@ docker-compose logs -f octogent
 
 ## Usage
 
-### CLI Commands
+<
 
 ```bash
 # Initialize Octogent (first-time setup)
@@ -112,17 +130,7 @@ octogent workers
 # View active tasks
 octogent tasks list
 
-# Run as system daemon
-octogent daemon --enable
-
-# Health check
-octogent doctor
-```
-
-### Programmatic Usage
-
-```typescript
-import { startServer, submitTask } from 'octogent';
+<
 
 // Start the server
 await startServer();
@@ -133,7 +141,7 @@ const result = await submitTask({
   priority: 1,
 });
 
-console.log(result);
+
 ```
 
 ## Configuration
@@ -175,51 +183,7 @@ OCTOGENT_HOST=127.0.0.1
 SEARXNG_URL=http://localhost:8080
 ```
 
-## Architecture
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                        CLI                              │
-│              octogent chat / task / ...                 │
-└────────────────────────┬────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────┐
-│                     Gateway                             │
-│              WebSocket + REST API                       │
-│            ws://127.0.0.1:18789                         │
-└────────────────────────┬────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────┐
-│                   Worker Pool                           │
-│           8 parallel worker_threads                     │
-├─────────┬─────────┬─────────┬─────────┬────────────────┤
-│ Worker  │ Worker  │ Worker  │ Worker  │      ...       │
-│   #1    │   #2    │   #3    │   #4    │                │
-└────┬────┴────┬────┴────┬────┴────┬────┴────────────────┘
-     │         │         │         │
-     └─────────┴─────────┴─────────┘
-                    │
-                    ▼
-┌─────────────────────────────────────────────────────────┐
-│                   Agent Loop                            │
-│            Think → Act → Observe                        │
-├───────────────────┬─────────────────────────────────────┤
-│                   │                                     │
-│    ┌──────────────┴──────────────┐                      │
-│    ▼                             ▼                      │
-│ ┌───────────┐              ┌───────────┐                │
-│ │   LLM     │              │   Tools   │                │
-│ │  Router   │              │  Registry │                │
-│ └─────┬─────┘              └─────┬─────┘                │
-│       │                          │                      │
-│   ┌───┴───┐                  ┌───┴───┐                  │
-│   ▼       ▼                  ▼       ▼                  │
-│ Ollama  Groq              bash   read_file             │
-│ (local) (cloud)           write  web_search            │
-│                           spawn  memory                 │
-└─────────────────────────────────────────────────────────┘
 ```
 
 ### Core Components
@@ -274,10 +238,7 @@ Create custom skills in `workspace/skills/<name>.json`.
 
 ## Security
 
-- **Sandbox Mode** — Bash commands run with configurable restrictions
-- **Tool Allowlists** — Control which tools are available
-- **Memory Isolation** — Sessions have isolated memory namespaces
-- **Rate Limiting** — Configurable limits on API and tool usage
+
 
 ## Development
 
@@ -370,18 +331,18 @@ git commit -m "feat: add my feature"
 git push origin feature/my-feature
 ```
 
+
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
 <div align="center">
 
-**Built by [Octogent Labs](mailto:octogent@pm.me)**
+
 
 [Report Bug](https://github.com/OctogentAI/Octogent/issues) |
 [Request Feature](https://github.com/OctogentAI/Octogent/issues) |
 [Discussions](https://github.com/OctogentAI/Octogent/discussions)
 
-</div>
