@@ -1,0 +1,329 @@
+/**
+ * Octogent Theme Styles
+ * Copyright (c) 2024 Octogent Labs. All rights reserved.
+ * Contact: Octogent@pm.me
+ */
+
+/* ============================================
+   Octogent Design System
+   Deployed by Octogent Labs
+   ============================================ */
+
+/* Custom Properties */
+:root {
+  /* Brand Colors */
+  --octogent-primary: #10b981;
+  --octogent-primary-light: #34d399;
+  --octogent-primary-dark: #059669;
+  
+  /* Accent Colors */
+  --octogent-accent: #06b6d4;
+  --octogent-accent-light: #22d3ee;
+  --octogent-accent-dark: #0891b2;
+  
+  /* Status Colors */
+  --octogent-success: #22c55e;
+  --octogent-warning: #f59e0b;
+  --octogent-error: #ef4444;
+  --octogent-info: #3b82f6;
+  
+  /* Worker Status Colors */
+  --octogent-worker-idle: #6b7280;
+  --octogent-worker-busy: #10b981;
+  --octogent-worker-error: #ef4444;
+  --octogent-worker-starting: #f59e0b;
+  
+  /* Neutral Colors */
+  --octogent-gray-50: #f9fafb;
+  --octogent-gray-100: #f3f4f6;
+  --octogent-gray-200: #e5e7eb;
+  --octogent-gray-300: #d1d5db;
+  --octogent-gray-400: #9ca3af;
+  --octogent-gray-500: #6b7280;
+  --octogent-gray-600: #4b5563;
+  --octogent-gray-700: #374151;
+  --octogent-gray-800: #1f2937;
+  --octogent-gray-900: #111827;
+  --octogent-gray-950: #030712;
+  
+  /* Typography */
+  --octogent-font-sans: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  --octogent-font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
+  
+  /* Spacing */
+  --octogent-space-1: 0.25rem;
+  --octogent-space-2: 0.5rem;
+  --octogent-space-3: 0.75rem;
+  --octogent-space-4: 1rem;
+  --octogent-space-5: 1.25rem;
+  --octogent-space-6: 1.5rem;
+  --octogent-space-8: 2rem;
+  --octogent-space-10: 2.5rem;
+  --octogent-space-12: 3rem;
+  
+  /* Border Radius */
+  --octogent-radius-sm: 0.25rem;
+  --octogent-radius-md: 0.375rem;
+  --octogent-radius-lg: 0.5rem;
+  --octogent-radius-xl: 0.75rem;
+  --octogent-radius-2xl: 1rem;
+  --octogent-radius-full: 9999px;
+  
+  /* Shadows */
+  --octogent-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --octogent-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --octogent-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --octogent-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  
+  /* Transitions */
+  --octogent-transition-fast: 150ms ease;
+  --octogent-transition-normal: 200ms ease;
+  --octogent-transition-slow: 300ms ease;
+}
+
+/* Dark Theme Overrides */
+[data-theme="dark"],
+.dark {
+  --octogent-bg-primary: var(--octogent-gray-950);
+  --octogent-bg-secondary: var(--octogent-gray-900);
+  --octogent-bg-tertiary: var(--octogent-gray-800);
+  --octogent-text-primary: var(--octogent-gray-50);
+  --octogent-text-secondary: var(--octogent-gray-400);
+  --octogent-border: var(--octogent-gray-800);
+}
+
+/* ============================================
+   Component Styles
+   ============================================ */
+
+/* Worker Card */
+.octogent-worker-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--octogent-space-4);
+  background: var(--octogent-gray-900);
+  border: 1px solid var(--octogent-gray-800);
+  border-radius: var(--octogent-radius-xl);
+  transition: all var(--octogent-transition-normal);
+}
+
+.octogent-worker-card:hover {
+  border-color: var(--octogent-primary);
+  box-shadow: 0 0 0 1px var(--octogent-primary);
+}
+
+.octogent-worker-card[data-status="idle"] {
+  --worker-color: var(--octogent-worker-idle);
+}
+
+.octogent-worker-card[data-status="busy"] {
+  --worker-color: var(--octogent-worker-busy);
+}
+
+.octogent-worker-card[data-status="error"] {
+  --worker-color: var(--octogent-worker-error);
+}
+
+.octogent-worker-indicator {
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--octogent-radius-full);
+  background: var(--worker-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: white;
+  margin-bottom: var(--octogent-space-2);
+}
+
+/* Chat Interface */
+.octogent-chat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--octogent-gray-950);
+}
+
+.octogent-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--octogent-space-4);
+  border-bottom: 1px solid var(--octogent-gray-800);
+}
+
+.octogent-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--octogent-space-4);
+}
+
+.octogent-chat-input {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--octogent-space-3);
+  padding: var(--octogent-space-4);
+  border-top: 1px solid var(--octogent-gray-800);
+  background: var(--octogent-gray-900);
+}
+
+/* Message Bubble */
+.octogent-message {
+  display: flex;
+  margin-bottom: var(--octogent-space-3);
+}
+
+.octogent-message[data-role="user"] {
+  justify-content: flex-end;
+}
+
+.octogent-message[data-role="assistant"] {
+  justify-content: flex-start;
+}
+
+.octogent-message-bubble {
+  max-width: 80%;
+  padding: var(--octogent-space-3) var(--octogent-space-4);
+  border-radius: var(--octogent-radius-xl);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.octogent-message[data-role="user"] .octogent-message-bubble {
+  background: var(--octogent-primary);
+  color: white;
+  border-bottom-right-radius: var(--octogent-radius-sm);
+}
+
+.octogent-message[data-role="assistant"] .octogent-message-bubble {
+  background: var(--octogent-gray-800);
+  color: var(--octogent-gray-100);
+  border-bottom-left-radius: var(--octogent-radius-sm);
+}
+
+/* Task List */
+.octogent-task-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--octogent-space-2);
+}
+
+.octogent-task-item {
+  display: flex;
+  align-items: center;
+  gap: var(--octogent-space-3);
+  padding: var(--octogent-space-3) var(--octogent-space-4);
+  background: var(--octogent-gray-900);
+  border: 1px solid var(--octogent-gray-800);
+  border-radius: var(--octogent-radius-lg);
+  transition: all var(--octogent-transition-fast);
+}
+
+.octogent-task-item:hover {
+  background: var(--octogent-gray-800);
+}
+
+.octogent-task-status {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--octogent-radius-full);
+}
+
+.octogent-task-status[data-status="queued"] {
+  background: var(--octogent-gray-500);
+}
+
+.octogent-task-status[data-status="running"] {
+  background: var(--octogent-primary);
+  animation: pulse 2s infinite;
+}
+
+.octogent-task-status[data-status="completed"] {
+  background: var(--octogent-success);
+}
+
+.octogent-task-status[data-status="failed"] {
+  background: var(--octogent-error);
+}
+
+/* Logs Viewer */
+.octogent-logs {
+  font-family: var(--octogent-font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  background: var(--octogent-gray-950);
+  color: var(--octogent-gray-300);
+  padding: var(--octogent-space-4);
+  border-radius: var(--octogent-radius-lg);
+  overflow-x: auto;
+}
+
+.octogent-log-line {
+  display: flex;
+  gap: var(--octogent-space-3);
+}
+
+.octogent-log-timestamp {
+  color: var(--octogent-gray-600);
+  flex-shrink: 0;
+}
+
+.octogent-log-level {
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.octogent-log-level[data-level="info"] {
+  color: var(--octogent-info);
+}
+
+.octogent-log-level[data-level="warn"] {
+  color: var(--octogent-warning);
+}
+
+.octogent-log-level[data-level="error"] {
+  color: var(--octogent-error);
+}
+
+.octogent-log-level[data-level="debug"] {
+  color: var(--octogent-gray-500);
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Utility Classes */
+.octogent-text-gradient {
+  background: linear-gradient(135deg, var(--octogent-primary) 0%, var(--octogent-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.octogent-glow {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.octogent-border-glow {
+  border: 1px solid var(--octogent-primary);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+}

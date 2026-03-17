@@ -18,7 +18,8 @@ const DEFAULT_WORKSPACE = path.join(process.cwd(), 'workspace');
  */
 async function main(): Promise<void> {
   console.log('========================================');
-  console.log('  OpenClaw - Autonomous Multi-Agent AI');
+  console.log('  Octogent - Autonomous Multi-Agent AI');
+  console.log('  Deployed by Octogent Labs');
   console.log('========================================\n');
   
   // Load configuration
