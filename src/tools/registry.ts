@@ -2,7 +2,7 @@
 // Tool Registry - Central registration and execution of all tools
 // ============================================================================
 
-import type { ToolDefinition, ToolContext, ToolResult, ToolParameter } from '../../lib/types';
+import type { ToolDefinition, ToolContext, ToolResult, ToolParameter } from '../types';
 import { getConfig } from '../config';
 
 // Tool implementations

@@ -1,0 +1,72 @@
+{
+  "$schema": "./config.schema.json",
+  "llm": {
+    "provider": "ollama",
+    "model": "llama3.2:8b",
+    "baseUrl": "http://localhost:11434",
+    "temperature": 0.7,
+    "maxTokens": 4096
+  },
+  "workers": {
+    "max": 8,
+    "idleTimeout": 300000,
+    "taskTimeout": 600000
+  },
+  "workspace": ".",
+  "tools": {
+    "enabled": [],
+    "disabled": [],
+    "bash": {
+      "allowedCommands": [],
+      "blockedCommands": ["rm -rf /", "sudo rm", "mkfs", "dd if="],
+      "timeout": 30000
+    },
+    "webSearch": {
+      "provider": "duckduckgo",
+      "maxResults": 10
+    },
+    "webFetch": {
+      "timeout": 30000,
+      "maxSize": 10485760
+    }
+  },
+  "skills": {
+    "directory": "./skills",
+    "autoload": true
+  },
+  "memory": {
+    "backend": "file",
+    "directory": "./.octogent/memory",
+    "maxEntries": 1000
+  },
+  "logging": {
+    "level": "info",
+    "file": "./.octogent/octogent.log",
+    "console": true,
+    "timestamps": true
+  },
+  "security": {
+    "sandboxEnabled": true,
+    "allowedPaths": ["."],
+    "blockedPaths": ["/etc", "/var", "/usr", "/bin", "/sbin"],
+    "maxFileSize": 104857600,
+    "rateLimiting": {
+      "enabled": true,
+      "maxRequests": 100,
+      "windowMs": 60000
+    }
+  },
+  "api": {
+    "enabled": true,
+    "port": 8888,
+    "host": "127.0.0.1",
+    "cors": {
+      "enabled": false,
+      "origins": []
+    },
+    "auth": {
+      "enabled": false,
+      "apiKey": ""
+    }
+  }
+}
