@@ -506,6 +506,7 @@ cmd_models() {
 cmd_version() {
     echo "Octogent v$VERSION"
     echo "Copyright (c) 2024 Octogent Labs"
+    echo "Website: https://www.octogent.com/"
     echo "Contact: Octogent@pm.me"
 }
 
@@ -550,7 +551,8 @@ Examples:
   octogent chat
   octogent daemon --enable
 
-Documentation: https://github.com/OctogentAI/Octogent
+Website: https://www.octogent.com/
+GitHub: https://github.com/OctogentAI/Octogent
 Support: Octogent@pm.me
 EOF
 }

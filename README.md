@@ -1,7 +1,7 @@
-# Octogent — Autonomous Multi-Agent AI System
+# Octogent - Autonomous Multi-Agent AI System
 
 <p align="center">
-  <img src="public/octogent-logo.svg" alt="Octogent" width="120" />
+  <img src="assets/octogent-logo.png" alt="Octogent" width="200" />
 </p>
 
 <p align="center">
@@ -9,11 +9,11 @@
 </p>
 
 <p align="center">
-  <a href="#install">Install</a> •
-  <a href="#quick-start">Quick Start</a> •
-  <a href="#features">Features</a> •
-  <a href="#architecture">Architecture</a> •
-  <a href="#docs">Docs</a> •
+  <a href="#install">Install</a> -
+  <a href="#quick-start">Quick Start</a> -
+  <a href="#features">Features</a> -
+  <a href="#architecture">Architecture</a> -
+  <a href="https://www.octogent.com/">Website</a> -
   <a href="mailto:Octogent@pm.me">Contact</a>
 </p>
 
@@ -29,9 +29,11 @@
 
 ---
 
-Octogent is an autonomous multi-agent AI system you run on your own devices. It executes tasks in parallel across 8 worker slots, connects to multiple LLM backends (Ollama local, Groq cloud), and provides a real-time dashboard for monitoring and control. The Gateway is the control plane — the product is the assistant.
+Octogent is an autonomous multi-agent AI system you run on your own devices. It executes tasks in parallel across 8 worker slots, connects to multiple LLM backends (Ollama local, Groq cloud), and provides CLI-based control for monitoring and management. The Gateway is the control plane - the product is the assistant.
 
 If you want a personal, multi-agent assistant that feels local, fast, and always-on with parallel task execution, this is it.
+
+**Website:** [https://www.octogent.com/](https://www.octogent.com/)
 
 **Contact:** [Octogent@pm.me](mailto:Octogent@pm.me)
 
@@ -39,28 +41,28 @@ If you want a personal, multi-agent assistant that feels local, fast, and always
 
 ## Install
 
-### Step 1 — Initialize
+### Step 1 - Initialize
 
 ```bash
 npx octogent@latest init
 ```
 > Downloads core agent, prompts for model selection
 
-### Step 2 — Configure
+### Step 2 - Configure
 
 ```bash
 octogent config --model llama3.2:8b --threads 8
 ```
 > Set model and parallel task limit (1-8)
 
-### Step 3 — Launch
+### Step 3 - Launch
 
 ```bash
 octogent start
 ```
 > Agent is now running at localhost:8888
 
-### Optional — Run as Background Service
+### Optional - Run as Background Service
 
 ```bash
 octogent daemon --enable
@@ -73,7 +75,7 @@ octogent daemon --enable
 
 ## Quick Start
 
-**Runtime:** Node ≥22
+**Runtime:** Node >= 22
 
 ```bash
 # Initialize and configure
@@ -99,12 +101,11 @@ octogent tasks list
 
 ### Core Platform
 
-- **8-Slot Parallel Worker Pool** — Execute up to 8 tasks simultaneously using Node.js worker_threads
-- **Multi-LLM Backend** — Ollama (local, free) with Groq (cloud) fallback
-- **Autonomous Agent Loop** — Think → Act → Observe cycle with automatic tool selection
-- **Real-time Dashboard** — WebSocket-powered UI for monitoring workers, tasks, and sessions
-- **Skills System** — JSON-based skill definitions (Coder, Researcher, Writer, DevOps)
-- **Memory Persistence** — SQLite-backed long-term memory across sessions
+- **8-Slot Parallel Worker Pool** - Execute up to 8 tasks simultaneously using Node.js worker_threads
+- **Multi-LLM Backend** - Ollama (local, free) with Groq (cloud) fallback
+- **Autonomous Agent Loop** - Think -> Act -> Observe cycle with automatic tool selection
+- **Skills System** - JSON-based skill definitions (Coder, Researcher, Writer, DevOps)
+- **Memory Persistence** - SQLite-backed long-term memory across sessions
 
 ### Tools (10 Built-in)
 
@@ -123,60 +124,55 @@ octogent tasks list
 
 ### Channels
 
-- **CLI** — Interactive terminal interface
-- **Webhook** — HTTP endpoint for external integrations
-- **Cron** — Scheduled task execution
-- **WebSocket** — Real-time bidirectional communication
+- **CLI** - Interactive terminal interface
+- **Webhook** - HTTP endpoint for external integrations
+- **Cron** - Scheduled task execution
+- **WebSocket** - Real-time bidirectional communication
 
-### Dashboard Pages
+### Native SDKs
 
-- **Chat** — Conversational interface with streaming responses
-- **Tasks** — Task queue with status tracking
-- **Workers** — 8-slot grid visualization (idle/busy/error)
-- **Sessions** — Session history and management
-- **Skills** — Skill editor and management
-- **Logs** — Real-time activity logs with filtering
-- **Config** — Configuration editor
+- **iOS/macOS** - Swift SDK with SwiftUI components
+- **Android** - Kotlin SDK with Jetpack Compose support
 
 ---
 
 ## Architecture
 
 ```
-CLI / Webhook / Cron / Dashboard
-              │
-              ▼
-┌─────────────────────────────────┐
-│           Gateway               │
-│      (WebSocket + REST)         │
-│     ws://127.0.0.1:18789        │
-└──────────────┬──────────────────┘
-               │
-               ▼
-┌─────────────────────────────────┐
-│         Worker Pool             │
-│    (8 parallel worker_threads)  │
-└──────────────┬──────────────────┘
-               │
-    ┌──────────┼──────────┐
-    ▼          ▼          ▼
-┌───────┐ ┌───────┐ ┌───────┐
-│Worker │ │Worker │ │Worker │ ...
-│  #1   │ │  #2   │ │  #3   │
-└───┬───┘ └───┬───┘ └───┬───┘
-    │         │         │
-    ▼         ▼         ▼
-┌─────────────────────────────────┐
-│         Agent Loop              │
-│  (Think → Act → Observe)        │
-└──────────────┬──────────────────┘
-               │
-    ┌──────────┼──────────┐
-    ▼          ▼          ▼
-┌───────┐ ┌───────┐ ┌───────┐
-│Ollama │ │ Groq  │ │ Tools │
-│(local)│ │(cloud)│ │(10+)  │
-└───────┘ └───────┘ └───────┘
+CLI / Webhook / Cron
+        |
+        v
++-------------------------------+
+|           Gateway             |
+|      (WebSocket + REST)       |
+|     ws://127.0.0.1:18789      |
++---------------+---------------+
+                |
+                v
++-------------------------------+
+|         Worker Pool           |
+|    (8 parallel worker_threads)|
++---------------+---------------+
+                |
+    +-----------+-----------+
+    v           v           v
++-------+   +-------+   +-------+
+|Worker |   |Worker |   |Worker | ...
+|  #1   |   |  #2   |   |  #3   |
++---+---+   +---+---+   +---+---+
+    |           |           |
+    v           v           v
++-------------------------------+
+|         Agent Loop            |
+|  (Think -> Act -> Observe)    |
++---------------+---------------+
+                |
+    +-----------+-----------+
+    v           v           v
++-------+   +-------+   +-------+
+|Ollama |   | Groq  |   | Tools |
+|(local)|   |(cloud)|   | (10+) |
++-------+   +-------+   +-------+
 ```
 
 ---
@@ -223,10 +219,10 @@ docker-compose down
 ```
 
 Services:
-- **Octogent Server** — Port 18789 (WebSocket + REST)
-- **Redis** — Port 6379 (task queue, caching)
-- **Ollama** — Port 11434 (local LLM inference)
-- **SearXNG** — Port 8080 (web search)
+- **Octogent Server** - Port 18789 (WebSocket + REST)
+- **Redis** - Port 6379 (task queue, caching)
+- **Ollama** - Port 11434 (local LLM inference)
+- **SearXNG** - Port 8080 (web search)
 
 ---
 
@@ -243,9 +239,6 @@ pnpm build
 
 # Run the server
 pnpm server
-
-# Run the dashboard
-pnpm dev
 
 # Run CLI
 pnpm cli
@@ -287,10 +280,10 @@ Create custom skills in `workspace/skills/<skill-name>.json`.
 
 ## Security
 
-- **Sandbox Mode** — Bash commands run with configurable restrictions
-- **Allowlists** — Control which tools are available per session
-- **Memory Isolation** — Sessions have isolated memory namespaces
-- **Rate Limiting** — Configurable limits on API calls and tool usage
+- **Sandbox Mode** - Bash commands run with configurable restrictions
+- **Allowlists** - Control which tools are available per session
+- **Memory Isolation** - Sessions have isolated memory namespaces
+- **Rate Limiting** - Configurable limits on API calls and tool usage
 
 ---
 
@@ -359,22 +352,24 @@ octogent doctor
 ```
 
 Common issues:
-- **Ollama not running** — Start Ollama with `ollama serve`
-- **Model not found** — Pull the model with `octogent models pull llama3.2:8b`
-- **Port in use** — Change the port in config or use `--port` flag
-- **Memory issues** — Reduce `workers.poolSize` or use a smaller model
+- **Ollama not running** - Start Ollama with `ollama serve`
+- **Model not found** - Pull the model with `octogent models pull llama3.2:8b`
+- **Port in use** - Change the port in config or use `--port` flag
+- **Memory issues** - Reduce `workers.poolSize` or use a smaller model
 
 ---
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
 ## Contact
 
 For questions, feedback, or support:
+
+**Website:** [https://www.octogent.com/](https://www.octogent.com/)
 
 **Email:** [Octogent@pm.me](mailto:Octogent@pm.me)
 
@@ -383,5 +378,13 @@ For questions, feedback, or support:
 ---
 
 <p align="center">
-  <strong>Built with autonomy in mind.</strong>
+  <img src="assets/octogent-logo.png" alt="Octogent" width="80" />
+</p>
+
+<p align="center">
+  <strong>Built by Octogent Labs</strong>
+</p>
+
+<p align="center">
+  <a href="https://www.octogent.com/">www.octogent.com</a>
 </p>
