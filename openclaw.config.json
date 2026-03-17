@@ -1,0 +1,40 @@
+{
+  "models": {
+    "primary": "ollama/llama3:8b",
+    "fallbacks": ["groq/llama-3.1-8b-instant"],
+    "ollama_host": "http://localhost:11434",
+    "temperature": 0.7,
+    "max_tokens": 4096
+  },
+  "workers": {
+    "max_slots": 8,
+    "max_iterations": 50,
+    "thinking_mode": true,
+    "context_limit": 8000,
+    "prune_threshold": 6000
+  },
+  "gateway": {
+    "port": 18789,
+    "host": "127.0.0.1",
+    "cors_origins": ["http://localhost:3000"]
+  },
+  "tools": {
+    "enabled": [
+      "bash",
+      "read_file",
+      "write_file",
+      "list_dir",
+      "web_search",
+      "web_fetch",
+      "memory_save",
+      "memory_read",
+      "spawn_agent",
+      "check_task"
+    ],
+    "disabled": [],
+    "bash_timeout": 30000,
+    "max_file_size": 1048576,
+    "searxng_url": "http://localhost:8080"
+  },
+  "cron": []
+}
