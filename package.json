@@ -1,29 +1,121 @@
 {
   "name": "octogent",
   "version": "1.0.0",
+  "description": "Autonomous Multi-Agent AI System - Local-first, privacy-focused AI agents that work for you",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./cli": {
+      "import": "./dist/cli.js"
+    },
+    "./tools": {
+      "import": "./dist/tools/index.js",
+      "types": "./dist/tools/index.d.ts"
+    },
+    "./providers": {
+      "import": "./dist/providers/index.js",
+      "types": "./dist/providers/index.d.ts"
+    }
   },
-  "author": "Octogent Labs <Octogent@pm.me>",
-  "license": "MIT",
+  "bin": {
+    "octogent": "./bin/octogent"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "cli": "tsx src/cli.ts",
+    "lint": "oxlint . --fix",
+    "format": "prettier --write .",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "test:e2e": "vitest --config vitest.e2e.config.ts",
+    "typecheck": "tsc --noEmit",
+    "prepare": "node scripts/prepare.js",
+    "prepublishOnly": "pnpm build && pnpm test"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "autonomous",
+    "multi-agent",
+    "llm",
+    "ollama",
+    "groq",
+    "cli",
+    "local-first",
+    "privacy",
+    "coding-agent",
+    "agentic"
+  ],
+  "author": "Octogent Labs <octogent@pm.me>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OctogentAI/Octogent.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OctogentAI/Octogent/issues"
+  },
+  "homepage": "https://github.com/OctogentAI/Octogent#readme",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
-    "better-sqlite3": "^12.8.0",
-    "chalk": "^5.4.1",
-    "commander": "^13.1.0",
-    "inquirer": "^12.6.0",
-    "jsdom": "^29.0.0",
+    "better-sqlite3": "^12.0.0",
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "diff": "^7.0.0",
+    "dotenv": "^16.4.5",
+    "eventsource-parser": "^3.0.0",
+    "glob": "^11.0.0",
+    "inquirer": "^12.0.0",
+    "jsdom": "^25.0.0",
+    "minimatch": "^10.0.0",
+    "node-cron": "^3.0.3",
     "ora": "^8.1.0",
-    "ws": "^8.19.0",
-    "zod": "^3.24.1"
+    "pino": "^9.4.0",
+    "pino-pretty": "^11.2.0",
+    "semver": "^7.6.3",
+    "tree-kill": "^1.2.2",
+    "uuid": "^10.0.0",
+    "ws": "^8.18.0",
+    "yaml": "^2.5.1",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.13",
-    "@types/node": "^22",
-    "@types/ws": "^8.5.14",
-    "oxlint": "^1.0.0",
-    "prettier": "^3.5.3",
-    "tsup": "^8.5.0",
-    "tsx": "^4.19.2",
-    "typescript": "5.7.3",
-    "vitest": "^3.1.0"
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/diff": "^6.0.0",
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^22.7.0",
+    "@types/node-cron": "^3.0.11",
+    "@types/semver": "^7.5.8",
+    "@types/uuid": "^10.0.0",
+    "@types/ws": "^8.5.12",
+    "@vitest/coverage-v8": "^2.1.0",
+    "oxlint": "^0.9.0",
+    "prettier": "^3.3.3",
+    "tsup": "^8.2.4",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "esbuild": "^0.23.0"
+    }
   }
 }
