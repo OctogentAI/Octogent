@@ -60,12 +60,29 @@ interface AnthropicStreamEvent {
 }
 
 const CLAUDE_MODELS: Record<string, { contextLength: number; costInput: number; costOutput: number }> = {
-  'claude-sonnet-4-20250514': { contextLength: 200000, costInput: 3.00, costOutput: 15.00 },
-  'claude-3-5-sonnet-20241022': { contextLength: 200000, costInput: 3.00, costOutput: 15.00 },
-  'claude-3-5-haiku-20241022': { contextLength: 200000, costInput: 0.80, costOutput: 4.00 },
-  'claude-3-opus-20240229': { contextLength: 200000, costInput: 15.00, costOutput: 75.00 },
-  'claude-3-sonnet-20240229': { contextLength: 200000, costInput: 3.00, costOutput: 15.00 },
-  'claude-3-haiku-20240307': { contextLength: 200000, costInput: 0.25, costOutput: 1.25 },
+  // Claude 4 family (2025)
+  'claude-opus-4-6-20251001': { contextLength: 400000, costInput: 30.00, costOutput: 150.00 },
+  'claude-opus-4-5-20250901': { contextLength: 400000, costInput: 25.00, costOutput: 125.00 },
+  'claude-sonnet-4-20250514': { contextLength: 200000, costInput: 3.00,  costOutput: 15.00  },
+  'claude-haiku-4-20250514':  { contextLength: 200000, costInput: 0.80,  costOutput: 4.00   },
+  // Claude 3.5 family
+  'claude-3-5-sonnet-20241022': { contextLength: 200000, costInput: 3.00,  costOutput: 15.00 },
+  'claude-3-5-haiku-20241022':  { contextLength: 200000, costInput: 0.80,  costOutput: 4.00  },
+  // Claude 3 family
+  'claude-3-opus-20240229':   { contextLength: 200000, costInput: 15.00, costOutput: 75.00 },
+  'claude-3-sonnet-20240229': { contextLength: 200000, costInput: 3.00,  costOutput: 15.00 },
+  'claude-3-haiku-20240307':  { contextLength: 200000, costInput: 0.25,  costOutput: 1.25  },
+};
+
+/** Canonical alias map so users can write e.g. "claude-opus-4.6" in their config */
+const CLAUDE_ALIASES: Record<string, string> = {
+  'claude-opus-4.6':  'claude-opus-4-6-20251001',
+  'claude-opus-4.5':  'claude-opus-4-5-20250901',
+  'claude-sonnet-4':  'claude-sonnet-4-20250514',
+  'claude-haiku-4':   'claude-haiku-4-20250514',
+  'claude-opus':      'claude-3-opus-20240229',
+  'claude-sonnet':    'claude-3-5-sonnet-20241022',
+  'claude-haiku':     'claude-3-5-haiku-20241022',
 };
 
 export class AnthropicProvider extends BaseLLMProvider {
@@ -74,7 +91,9 @@ export class AnthropicProvider extends BaseLLMProvider {
   private apiVersion = '2023-06-01';
 
   constructor(config: LLMConfig) {
-    super(config, 'anthropic');
+    // Resolve friendly alias to canonical model id
+    const resolvedModel = CLAUDE_ALIASES[config.model] ?? config.model;
+    super({ ...config, model: resolvedModel }, 'anthropic');
     this.apiKey = process.env.ANTHROPIC_API_KEY || '';
   }
 
@@ -120,7 +139,10 @@ export class AnthropicProvider extends BaseLLMProvider {
   }
 
   async listModels(): Promise<string[]> {
-    return Object.keys(CLAUDE_MODELS);
+    return [
+      ...Object.keys(CLAUDE_MODELS),
+      ...Object.keys(CLAUDE_ALIASES),
+    ];
   }
 
   async chat(options: ChatCompletionOptions): Promise<LLMResponse> {

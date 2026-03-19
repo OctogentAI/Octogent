@@ -69,14 +69,47 @@ interface OpenAIStreamChunk {
 }
 
 const MODEL_CONTEXT_LENGTHS: Record<string, number> = {
-  'gpt-4o': 128000,
-  'gpt-4o-mini': 128000,
-  'gpt-4-turbo': 128000,
-  'gpt-4': 8192,
-  'gpt-3.5-turbo': 16385,
-  'o1': 200000,
-  'o1-mini': 128000,
-  'o1-preview': 128000,
+  // GPT-5 family (2025)
+  'gpt-5.2-pro':      1000000,
+  'gpt-5.2':          500000,
+  'gpt-5':            500000,
+  'gpt-5-mini':       256000,
+  // GPT-4o family
+  'gpt-4o':           128000,
+  'gpt-4o-mini':      128000,
+  // GPT-4 family
+  'gpt-4-turbo':      128000,
+  'gpt-4':            8192,
+  // GPT-3.5
+  'gpt-3.5-turbo':    16385,
+  // o-series reasoning models
+  'o3':               200000,
+  'o3-mini':          128000,
+  'o1':               200000,
+  'o1-mini':          128000,
+  'o1-preview':       128000,
+};
+
+/** Cost per million tokens (input / output) in USD */
+const MODEL_COSTS: Record<string, { input: number; output: number }> = {
+  'gpt-5.2-pro': { input: 15.00, output: 60.00 },
+  'gpt-5.2':     { input: 10.00, output: 40.00 },
+  'gpt-5':       { input: 10.00, output: 40.00 },
+  'gpt-5-mini':  { input: 2.00,  output: 8.00  },
+  'gpt-4o':      { input: 2.50,  output: 10.00 },
+  'gpt-4o-mini': { input: 0.15,  output: 0.60  },
+  'o3':          { input: 20.00, output: 80.00 },
+  'o3-mini':     { input: 1.10,  output: 4.40  },
+  'o1':          { input: 15.00, output: 60.00 },
+  'o1-mini':     { input: 3.00,  output: 12.00 },
+};
+
+/** Friendly alias → canonical model id */
+const OPENAI_ALIASES: Record<string, string> = {
+  'gpt5-pro':    'gpt-5.2-pro',
+  'gpt-5-pro':   'gpt-5.2-pro',
+  'gpt5.2':      'gpt-5.2',
+  'latest':      'gpt-5.2-pro',
 };
 
 export class OpenAIProvider extends BaseLLMProvider {
@@ -84,23 +117,25 @@ export class OpenAIProvider extends BaseLLMProvider {
   private baseUrl: string;
 
   constructor(config: LLMConfig, name: string = 'openai') {
-    super(config, name);
+    const resolvedModel = OPENAI_ALIASES[config.model] ?? config.model;
+    super({ ...config, model: resolvedModel }, name);
     this.apiKey = process.env.OPENAI_API_KEY || '';
     this.baseUrl = process.env.OPENAI_API_BASE || 'https://api.openai.com/v1';
   }
 
   getCapabilities(): ProviderCapabilities {
     const contextLength = MODEL_CONTEXT_LENGTHS[this.config.model] || 8192;
+    const costs = MODEL_COSTS[this.config.model] || { input: 2.50, output: 10.00 };
+    const isVision = this.config.model.includes('gpt-4')
+      || this.config.model.includes('o1')
+      || this.config.model.includes('gpt-5');
 
     return {
-      streaming: true,
+      streaming: !this.config.model.startsWith('o1'),
       functionCalling: true,
-      vision: this.config.model.includes('gpt-4') || this.config.model.includes('o1'),
+      vision: isVision,
       maxContextLength: contextLength,
-      costPerMillionTokens: {
-        input: this.config.model.includes('gpt-4o') ? 2.50 : 0.50,
-        output: this.config.model.includes('gpt-4o') ? 10.00 : 1.50,
-      },
+      costPerMillionTokens: costs,
     };
   }
 
@@ -119,21 +154,25 @@ export class OpenAIProvider extends BaseLLMProvider {
   }
 
   async listModels(): Promise<string[]> {
-    if (!this.apiKey) return [];
+    const known = [...Object.keys(MODEL_CONTEXT_LENGTHS), ...Object.keys(OPENAI_ALIASES)];
+
+    if (!this.apiKey) return known;
 
     try {
       const response = await fetch(`${this.baseUrl}/models`, {
         headers: { Authorization: `Bearer ${this.apiKey}` },
+        signal: AbortSignal.timeout(5000),
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to list models: ${response.status}`);
-      }
+      if (!response.ok) return known;
 
       const data = await response.json() as { data: Array<{ id: string }> };
-      return data.data.map((m) => m.id).filter((id) => id.startsWith('gpt-'));
-    } catch (error) {
-      throw new LLMConnectionError(this.name, this.config.model, error as Error);
+      const live = data.data.map((m) => m.id).filter((id) =>
+        id.startsWith('gpt-') || id.startsWith('o1') || id.startsWith('o3')
+      );
+      return Array.from(new Set([...known, ...live]));
+    } catch {
+      return known;
     }
   }
 
