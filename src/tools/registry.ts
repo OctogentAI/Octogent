@@ -15,6 +15,15 @@ import { webFetchTool } from './web-fetch';
 import { memorySaveTool, memoryReadTool } from './memory';
 import { spawnAgentTool } from './spawn-agent';
 import { checkTaskTool } from './check-task';
+import { codeSearchTool } from './code-search';
+import { taskPlannerTool } from './task-planner';
+import { summarizeTool } from './summarize';
+import { diffApplyTool } from './diff-apply';
+import { httpRequestTool } from './http-request';
+import { globTool } from './glob';
+import { grepTool } from './grep';
+import { gitTool } from './git';
+import { patchTool } from './patch';
 
 // Registry of all available tools
 const tools = new Map<string, ToolDefinition>();
@@ -31,6 +40,15 @@ function registerBuiltinTools(): void {
   tools.set('memory_read', memoryReadTool);
   tools.set('spawn_agent', spawnAgentTool);
   tools.set('check_task', checkTaskTool);
+  tools.set('code_search', codeSearchTool);
+  tools.set('task_planner', taskPlannerTool);
+  tools.set('summarize', summarizeTool);
+  tools.set('diff_apply', diffApplyTool);
+  tools.set('http_request', httpRequestTool);
+  tools.set('glob', globTool);
+  tools.set('grep', grepTool);
+  tools.set('git', gitTool);
+  tools.set('patch', patchTool);
 }
 
 // Initialize on module load

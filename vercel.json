@@ -1,7 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "buildCommand": "echo 'No build needed for CLI package'",
+  "installCommand": "npm install --legacy-peer-deps",
   "framework": null,
-  "installCommand": "pnpm install --no-frozen-lockfile",
-  "buildCommand": "pnpm build",
-  "outputDirectory": "dist"
+  "outputDirectory": "."
 }

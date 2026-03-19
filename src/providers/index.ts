@@ -5,6 +5,9 @@
 // Re-export base provider and types
 export * from './base.js';
 
+// Model registry
+export * from './models.js';
+
 // Import providers to trigger registration
 import './ollama.js';
 import './groq.js';
